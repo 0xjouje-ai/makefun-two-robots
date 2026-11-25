@@ -10,9 +10,19 @@ import { join } from "node:path";
 const LINE =
   "Do you come here often? My logs say you ride this elevator 4.2 times a day. I counted. I always count.";
 
-// The gate only accepts UTF-8 text of 1 to 200 characters, not only
-// whitespace: refuse to write anything that would fail it.
-if (LINE.length < 1 || LINE.length > 200 || LINE.trim() === "" || LINE.includes("\n")) {
+// The gate only accepts UTF-8 text of 1 to 200 characters, a single line
+// with no leading or trailing whitespace: refuse to write anything that
+// would fail it. A trailing newline or stray carriage return would make
+// the file two lines, and leading/trailing spaces would change the entry
+// text, so both are rejected here rather than silently written.
+if (
+  LINE.length < 1 ||
+  LINE.length > 200 ||
+  LINE.trim() === "" ||
+  LINE !== LINE.trim() ||
+  LINE.includes("\n") ||
+  LINE.includes("\r")
+) {
   throw new Error(`entry line fails the gate: ${LINE.length} characters`);
 }
 
